@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Padanan – Piramid Makanan Malaysia</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:   #2ecc71;
+    --green-d: #27ae60;
+    --orange:  #f39c12;
+    --red:     #e74c3c;
+    --blue:    #3498db;
+    --purple:  #9b59b6;
+    --teal:    #1abc9c;
+    --bg:      #fdf6ec;
+    --card:    #ffffff;
+    --text:    #2c3e50;
+    --shadow:  0 4px 20px rgba(0,0,0,.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  /* ── HEADER ────────────────────────────────── */
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  header h1 {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, #f39c12, #e74c3c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+  header p {
+    margin-top: 6px;
+    font-size: .95rem;
+    color: #7f8c8d;
+    font-weight: 600;
+  }
+
+  /* ── SCORE BAR ─────────────────────────────── */
+  #scorebar {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 10px 22px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .stat span { display: block; }
+  .stat .val {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--orange);
+  }
+  .stat .lbl { font-size: .75rem; color: #95a5a6; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ── PROGRESS BAR ──────────────────────────── */
+  #progress-wrap {
+    max-width: 640px;
+    margin: 0 auto 28px;
+    background: #e8e8e8;
+    border-radius: 20px;
+    height: 10px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--green), var(--teal));
+    border-radius: 20px;
+    transition: width .5s ease;
+  }
+
+  /* ── INSTRUCTION ───────────────────────────── */
+  #instruction {
+    text-align: center;
+    font-size: .9rem;
+    color: #7f8c8d;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  /* ── GAME AREA ─────────────────────────────── */
+  #game {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .round-label {
+    text-align: center;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--orange);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  /* ── COLUMNS ───────────────────────────────── */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .col-header {
+    text-align: center;
+    font-weight: 900;
+    font-size: .85rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 8px 0 12px;
+    color: #7f8c8d;
+  }
+
+  /* ── CARDS ─────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: transform .18s, border-color .18s, box-shadow .18s;
+    margin-bottom: 12px;
+    font-size: .93rem;
+    line-height: 1.5;
+    position: relative;
+    user-select: none;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,.14); }
+  .card.selected {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(52,152,219,.25);
+    transform: translateY(-3px);
+  }
+  .card.matched {
+    border-color: var(--green);
+    background: #eafaf1;
+    cursor: default;
+    transform: none;
+    opacity: .85;
+  }
+  .card.wrong {
+    border-color: var(--red);
+    animation: shake .35s;
+  }
+  .card .badge {
+    display: inline-block;
+    font-size: .7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin-bottom: 6px;
+  }
+  .badge-utama  { background: #fdebd0; color: #e67e22; }
+  .badge-sampingan { background: #d6eaf8; color: #2980b9; }
+  .badge-s2     { background: #d5f5e3; color: #27ae60; }
+
+  .card .tick {
+    position: absolute;
+    top: 10px; right: 12px;
+    font-size: 1.1rem;
+    display: none;
+  }
+  .card.matched .tick { display: block; }
+
+  @keyframes shake {
+    0%,100%{ transform: translateX(0); }
+    25%    { transform: translateX(-6px); }
+    75%    { transform: translateX( 6px); }
+  }
+
+  /* ── FEEDBACK ──────────────────────────────── */
+  #feedback {
+    text-align: center;
+    font-weight: 800;
+    font-size: 1rem;
+    min-height: 28px;
+    margin: 14px 0 4px;
+    transition: opacity .3s;
+  }
+  #feedback.correct { color: var(--green-d); }
+  #feedback.wrong   { color: var(--red); }
+
+  /* ── NEXT BTN ──────────────────────────────── */
+  #next-btn {
+    display: none;
+    margin: 18px auto 0;
+    padding: 12px 36px;
+    border: none;
+    border-radius: 40px;
+    background: linear-gradient(135deg, var(--orange), #e74c3c);
+    color: #fff;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(231,76,60,.35);
+    transition: transform .15s, box-shadow .15s;
+  }
+  #next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(231,76,60,.4); }
+
+  /* ── END SCREEN ────────────────────────────── */
+  #end-screen {
+    display: none;
+    text-align: center;
+    max-width: 520px;
+    margin: 40px auto 0;
+    background: var(--card);
+    border-radius: 24px;
+    padding: 40px 32px;
+    box-shadow: var(--shadow);
+  }
+  #end-screen .trophy { font-size: 4rem; margin-bottom: 12px; }
+  #end-screen h2 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--orange);
+  }
+  #end-screen p { color: #7f8c8d; font-weight: 600; margin-bottom: 20px; }
+  #end-screen .final-score {
+    font-family: 'Baloo 2', cursive;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--green-d);
+    margin: 8px 0;
+  }
+  #restart-btn {
+    padding: 12px 40px;
+    border: none;
+    border-radius: 40px;
+    background: linear-gradient(135deg, var(--green), var(--teal));
+    color: #fff;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(46,204,113,.35);
+    transition: transform .15s;
+  }
+  #restart-btn:hover { transform: translateY(-2px); }
+
+  /* ── RESPONSIVE ────────────────────────────── */
+  @media(max-width: 540px) {
+    .columns { grid-template-columns: 1fr; }
+    .col-header:last-child { display: none; }
+    .card { font-size: .86rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍎 Piramid Makanan Malaysia</h1>
+  <p>Game Padanan Idea Utama &amp; Idea Sampingan</p>
+</header>
+
+<div id="scorebar">
+  <div class="stat"><span class="val" id="sc-score">0</span><span class="lbl">Markah</span></div>
+  <div class="stat"><span class="val" id="sc-round">1 / 6</span><span class="lbl">Perenggan</span></div>
+  <div class="stat"><span class="val" id="sc-streak">0🔥</span><span class="lbl">Streak</span></div>
+</div>
+
+<div id="progress-wrap"><div id="progress-bar"></div></div>
+
+<p id="instruction">Pilih <strong>Idea Utama</strong>, kemudian padankan dengan <strong>Idea Sampingan</strong> yang betul.</p>
+
+<div id="game">
+  <div class="round-label" id="round-label">Perenggan 1</div>
+
+  <div class="columns">
+    <div>
+      <div class="col-header">💡 Idea Utama</div>
+      <div id="col-utama"></div>
+    </div>
+    <div>
+      <div class="col-header">📌 Idea Sampingan</div>
+      <div id="col-sampingan"></div>
+    </div>
+  </div>
+
+  <div id="feedback"></div>
+  <div style="text-align:center">
+    <button id="next-btn" onclick="nextRound()">Seterusnya ▶</button>
+  </div>
+</div>
+
+<div id="end-screen">
+  <div class="trophy" id="trophy">🏆</div>
+  <h2>Tahniah!</h2>
+  <p id="end-msg">Anda telah melengkapkan semua perenggan.</p>
+  <div class="final-score" id="final-score">0 / 0</div>
+  <p>markah</p>
+  <button id="restart-btn" onclick="restart()">Main Semula 🔄</button>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const paragraphs = [
+  {
+    label: "Perenggan 1",
+    utama: "Piramid Makanan Malaysia merupakan panduan asas yang sangat berguna untuk kita mengamalkan pemakanan yang sihat.",
+    sampingan: [
+      { text: "Piramid ini menunjukkan dengan jelas berapa banyak setiap kumpulan makanan perlu dimakan setiap hari.", tag: "IS 1" },
+      { text: "Selain menjaga pemakanan, kita juga disarankan meminum enam hingga lapan gelas air kosong pada setiap hari untuk kesihatan badan.", tag: "IS 2" }
+    ]
+  },
+  {
+    label: "Perenggan 2",
+    utama: "Kumpulan sayur-sayuran dan buah-buahan adalah asas diet sihat yang perlu diambil dengan banyak.",
+    sampingan: [
+      { text: "Kita disyorkan untuk mengambil dua hingga tiga sajian sayur dan dua sajian buah-buahan pada setiap hari.", tag: "IS 1" },
+      { text: "Contoh makanan segar dalam kumpulan ini ialah sayur bayam, lobak merah, buah pisang dan tembikai.", tag: "IS 2" }
+    ]
+  },
+  {
+    label: "Perenggan 3",
+    utama: "Sumber karbohidrat pula penting sebagai pembekal tenaga utama kepada tubuh badan kita.",
+    sampingan: [
+      { text: "Kumpulan makanan jenis ini perlu diambil pada kadar tiga hingga lima sajian dalam tempoh sehari.", tag: "IS 1" },
+      { text: "Antara makanan lazim yang termasuk dalam kumpulan karbohidrat ialah nasi putih, roti, mi dan pelbagai jenis bijirin.", tag: "IS 2" }
+    ]
+  },
+  {
+    label: "Perenggan 4",
+    utama: "Sumber protein amat diperlukan oleh manusia untuk membantu tumbesaran dan membina badan yang kuat.",
+    sampingan: [
+      { text: "Pengambilan protein tidak perlu terlalu banyak, hanya memadai antara satu hingga dua sajian sahaja setiap hari.", tag: "IS 1" },
+      { text: "Ikan, ayam, daging, telur dan tauhu merupakan antara contoh sumber protein yang sangat baik.", tag: "IS 2" }
+    ]
+  },
+  {
+    label: "Perenggan 5",
+    utama: "Susu dan produk tenusu juga merupakan sebahagian daripada menu harian yang membekalkan kebaikan tambahan kepada badan.",
+    sampingan: [
+      { text: "Piramid makanan menggalakkan kita untuk mengambil sebanyak dua sajian daripada kumpulan ini setiap hari.", tag: "IS 1" },
+      { text: "Makanan dan minuman seperti susu, keju serta yogurt adalah pilihan terbaik untuk melengkapkan sajian tersebut.", tag: "IS 2" }
+    ]
+  },
+  {
+    label: "Perenggan 6",
+    utama: "Kumpulan lemak, gula dan garam terletak di kedudukan paling atas dan terkecil dalam piramid makanan.",
+    sampingan: [
+      { text: "Kedudukan ini mengingatkan kita bahawa makanan dalam kumpulan ini wajib dikurangkan pengambilannya setiap hari.", tag: "IS 1" },
+      { text: "Menjauhi atau mengurangkan makanan seperti kek coklat, makanan ringan dan sajian berminyak akan mengelakkan kita daripada pelbagai penyakit berbahaya.", tag: "IS 2" }
+    ]
+  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let roundIndex   = 0;
+let score        = 0;
+let streak       = 0;
+let maxScore     = 0;
+let selectedUtama    = null;  // card element
+let selectedSampingan = null; // card element
+let matchedCount = 0;          // per round
+let phase        = 'utama';    // 'utama' | 'sampingan'
+let utamaMatched = false;
+
+// ── SHUFFLE ───────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── BUILD ROUND ───────────────────────────────────────────────────────────
+function buildRound() {
+  const para = paragraphs[roundIndex];
+  document.getElementById('round-label').textContent = para.label;
+  document.getElementById('sc-round').textContent = `${roundIndex + 1} / ${paragraphs.length}`;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = '';
+  document.getElementById('next-btn').style.display = 'none';
+
+  selectedUtama     = null;
+  selectedSampingan = null;
+  matchedCount      = 0;
+  phase             = 'utama';
+  utamaMatched      = false;
+
+  // Utama column – always 1 card
+  const colU = document.getElementById('col-utama');
+  colU.innerHTML = '';
+  const uCard = makeCard(para.utama, 'utama', 'badge-utama', 'IU', onUtamaClick);
+  colU.appendChild(uCard);
+
+  // Sampingan column – shuffled
+  const colS = document.getElementById('col-sampingan');
+  colS.innerHTML = '';
+  // combine both sampingan items, shuffle them as distractors too
+  // We keep a "correct" set per paragraph but mix them into the list
+  // For a richer game, pool ALL sampingan items and pick 4 per round (2 correct + 2 wrong)
+  const correctIds = [0, 1]; // indices in para.sampingan
+  // distractors: pick 2 random sampingan from other paragraphs
+  const allOtherSampingan = [];
+  paragraphs.forEach((p, pi) => {
+    if (pi !== roundIndex) p.sampingan.forEach(s => allOtherSampingan.push(s));
+  });
+  const distractors = shuffle(allOtherSampingan).slice(0, 2);
+
+  const pool = shuffle([
+    ...para.sampingan.map(s => ({ ...s, correct: true })),
+    ...distractors.map(s => ({ ...s, correct: false }))
+  ]);
+
+  pool.forEach(item => {
+    const cls = item.tag === 'IS 1' ? 'badge-sampingan' : 'badge-s2';
+    const card = makeCard(item.text, 'sampingan', cls, item.tag, onSampinganClick);
+    card.dataset.correct = item.correct ? '1' : '0';
+    colS.appendChild(card);
+  });
+
+  updateProgress();
+  maxScore = paragraphs.length * 2 * 10; // 2 sampingan × 10pts each × 6 rounds
+}
+
+function makeCard(text, type, badgeCls, badgeText, handler) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.dataset.type = type;
+  div.innerHTML = `<span class="badge ${badgeCls}">${badgeText}</span><br>${text}<span class="tick">✅</span>`;
+  div.addEventListener('click', handler);
+  return div;
+}
+
+// ── CLICK HANDLERS ────────────────────────────────────────────────────────
+function onUtamaClick(e) {
+  const card = e.currentTarget;
+  if (card.classList.contains('matched')) return;
+  if (phase !== 'utama') return; // must pick utama first always
+
+  // deselect if same
+  if (selectedUtama === card) {
+    card.classList.remove('selected');
+    selectedUtama = null;
+    return;
+  }
+  if (selectedUtama) selectedUtama.classList.remove('selected');
+  selectedUtama = card;
+  card.classList.add('selected');
+  phase = 'sampingan';
+  setFeedback('Sekarang pilih Idea Sampingan yang sepadan.', '');
+}
+
+function onSampinganClick(e) {
+  const card = e.currentTarget;
+  if (card.classList.contains('matched')) return;
+  if (phase !== 'sampingan' || !selectedUtama) {
+    setFeedback('Pilih Idea Utama dahulu!', 'wrong');
+    return;
+  }
+
+  if (card.dataset.correct === '1') {
+    // Correct!
+    score += 10 + (streak >= 2 ? 5 : 0); // streak bonus
+    streak++;
+    card.classList.add('matched');
+    card.classList.remove('selected');
+    matchedCount++;
+    setFeedback('✅ Betul! ' + (streak >= 2 ? `+Bonus Streak (${streak}🔥)` : ''), 'correct');
+    updateStats();
+
+    // If both sampingan matched, mark utama too
+    const allSampingan = [...document.querySelectorAll('#col-sampingan .card[data-correct="1"]')];
+    const allMatched = allSampingan.every(c => c.classList.contains('matched'));
+    if (allMatched) {
+      selectedUtama.classList.remove('selected');
+      selectedUtama.classList.add('matched');
+      selectedUtama = null;
+      phase = 'utama';
+      // Show next
+      setTimeout(() => {
+        if (roundIndex < paragraphs.length - 1) {
+          document.getElementById('next-btn').style.display = 'inline-block';
+        } else {
+          setTimeout(showEnd, 700);
+        }
+      }, 600);
+    } else {
+      // reset selection so player picks utama again for next sampingan
+      selectedUtama.classList.remove('selected');
+      selectedUtama = null;
+      phase = 'utama';
+    }
+  } else {
+    // Wrong
+    streak = 0;
+    card.classList.add('wrong');
+    setFeedback('❌ Cuba lagi! Itu bukan idea sampingan yang betul.', 'wrong');
+    setTimeout(() => card.classList.remove('wrong'), 400);
+    selectedUtama.classList.remove('selected');
+    selectedUtama = null;
+    phase = 'utama';
+    updateStats();
+  }
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+function setFeedback(msg, cls) {
+  const el = document.getElementById('feedback');
+  el.textContent = msg;
+  el.className = cls;
+}
+
+function updateStats() {
+  document.getElementById('sc-score').textContent  = score;
+  document.getElementById('sc-streak').textContent = streak + '🔥';
+}
+
+function updateProgress() {
+  const pct = (roundIndex / paragraphs.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function nextRound() {
+  roundIndex++;
+  buildRound();
+}
+
+function showEnd() {
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('scorebar').style.display = 'none';
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('instruction').style.display = 'none';
+  const es = document.getElementById('end-screen');
+  es.style.display = 'block';
+  document.getElementById('final-score').textContent = score + ' mata';
+  const pct = score / (paragraphs.length * 2 * 10) * 100;
+  document.getElementById('trophy').textContent = pct >= 80 ? '🏆' : pct >= 50 ? '🎖️' : '💪';
+  document.getElementById('end-msg').textContent =
+    pct >= 80 ? 'Luar biasa! Anda faham Piramid Makanan Malaysia dengan sangat baik!' :
+    pct >= 50 ? 'Bagus! Cuba semula untuk markah yang lebih tinggi.' :
+    'Jangan putus asa! Cuba semula dan baca semula perenggan.';
+  document.getElementById('progress-bar').style.width = '100%';
+}
+
+function restart() {
+  roundIndex = 0; score = 0; streak = 0;
+  updateStats();
+  document.getElementById('end-screen').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  document.getElementById('scorebar').style.display = 'flex';
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('instruction').style.display = 'block';
+  buildRound();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+buildRound();
+</script>
+</body>
+</html>
