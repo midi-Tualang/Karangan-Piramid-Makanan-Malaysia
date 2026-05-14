@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Piramid Makanan Pro – Edisi Cikgu</title>
+    <title>Game Karangan: Piramid Makanan Malaysia</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
@@ -18,7 +18,7 @@
             --card:    #ffffff;
             --text:    #2c3e50;
             --shadow:  0 8px 30px rgba(0,0,0,0.12);
-            --theme-color: #3498db; /* Default */
+            --theme-color: #3498db;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +32,6 @@
             transition: background 0.5s ease;
         }
 
-        /* ── TOP BAR ───────────────────────────────── */
         header { text-align: center; margin-bottom: 25px; }
         header h1 {
             font-family: 'Baloo 2', cursive;
@@ -55,7 +54,7 @@
             border-radius: 15px;
             box-shadow: var(--shadow);
             text-align: center;
-            min-width: 100px;
+            min-width: 110px;
         }
 
         .stat-box .label { font-size: 0.7rem; text-transform: uppercase; font-weight: 800; color: #95a5a6; }
@@ -66,7 +65,6 @@
 
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* ── PROGRESS ─────────────────────────────── */
         .progress-container {
             max-width: 600px;
             margin: 0 auto 25px;
@@ -82,12 +80,11 @@
             transition: width 0.4s ease;
         }
 
-        /* ── GAME AREA ─────────────────────────────── */
-        #game-wrap { max-width: 900px; margin: 0 auto; }
+        #game-wrap { max-width: 1000px; margin: 0 auto; }
         
         .columns {
             display: grid;
-            grid-template-columns: 1fr 1.2fr;
+            grid-template-columns: 1fr 1.3fr;
             gap: 20px;
         }
 
@@ -98,6 +95,7 @@
             margin-bottom: 15px;
             color: #7f8c8d;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .card {
@@ -128,6 +126,7 @@
             margin-bottom: 10px;
             background: var(--theme-color);
             color: white;
+            text-transform: uppercase;
         }
 
         @keyframes shake {
@@ -138,18 +137,17 @@
 
         #feedback {
             text-align: center;
-            height: 30px;
+            height: 35px;
             font-weight: 800;
             margin: 15px 0;
             font-size: 1.1rem;
         }
 
-        /* ── SCREENS ───────────────────────────────── */
         .overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(44, 62, 80, 0.9);
+            background: rgba(44, 62, 80, 0.95);
             z-index: 100;
             justify-content: center;
             align-items: center;
@@ -165,6 +163,7 @@
             border-radius: 30px;
             max-width: 500px;
             width: 100%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
         .btn-main {
@@ -182,15 +181,16 @@
         }
         .btn-main:hover { transform: scale(1.05); }
 
-        @media(max-width: 600px) {
+        @media(max-width: 768px) {
             .columns { grid-template-columns: 1fr; }
+            header h1 { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>🍎 Piramid Makanan Malaysia</h1>
+    <h1>🍎 Game Karangan: Piramid Makanan</h1>
 </header>
 
 <div class="stats-container">
@@ -200,11 +200,15 @@
     </div>
     <div class="stat-box">
         <div class="label">Masa</div>
-        <div class="value" id="timer-display">02:00</div>
+        <div class="value" id="timer-display">03:00</div>
     </div>
     <div class="stat-box">
         <div class="label">Nyawa</div>
         <div class="value" id="lives-display">❤️❤️❤️</div>
+    </div>
+    <div class="stat-box">
+        <div class="label">Perenggan</div>
+        <div class="value" id="round-val">1 / 6</div>
     </div>
 </div>
 
@@ -215,11 +219,11 @@
 <div id="game-wrap">
     <div class="columns">
         <div>
-            <div class="column-title">💡 IDEA UTAMA</div>
+            <div class="column-title">💡 Idea Utama</div>
             <div id="col-utama"></div>
         </div>
         <div>
-            <div class="column-title">📌 IDEA SAMPINGAN</div>
+            <div class="column-title">📌 Idea Sampingan</div>
             <div id="col-sampingan"></div>
         </div>
     </div>
@@ -230,48 +234,67 @@
     <div class="modal">
         <h2 id="end-title" style="font-size: 2.5rem; font-family: 'Baloo 2';">TAHNIAH! 🏆</h2>
         <p id="end-msg" style="margin: 15px 0; font-size: 1.1rem;"></p>
-        <div style="font-size: 3rem; font-weight: 900; color: var(--green-d);" id="final-score">0</div>
+        <div style="font-size: 3rem; font-weight: 900; color: var(--green-d); margin: 10px 0;" id="final-score">0</div>
+        <p>MATA KESELURUHAN</p>
         <button class="btn-main" onclick="location.reload()">Main Semula 🔄</button>
     </div>
 </div>
 
 <script>
-// DATA PERMAINAN
+// DATA PERMAINAN (6 PERENGGAN LENGKAP)
 const paragraphs = [
     {
-        title: "Asas Pemakanan",
-        color: "#3498db",
+        label: "Perenggan 1",
+        color: "#3498db", // Biru
         utama: "Piramid Makanan Malaysia merupakan panduan asas yang sangat berguna untuk kita mengamalkan pemakanan yang sihat.",
         sampingan: [
             { text: "Piramid ini menunjukkan dengan jelas berapa banyak setiap kumpulan makanan perlu dimakan setiap hari.", correct: true },
-            { text: "Selain menjaga pemakanan, kita juga disarankan meminum enam hingga lapan gelas air kosong.", correct: true }
+            { text: "Selain menjaga pemakanan, kita juga disarankan meminum enam hingga lapan gelas air kosong pada setiap hari untuk kesihatan badan.", correct: true }
         ]
     },
     {
-        title: "Sayur & Buah",
-        color: "#27ae60",
+        label: "Perenggan 2",
+        color: "#27ae60", // Hijau
         utama: "Kumpulan sayur-sayuran dan buah-buahan adalah asas diet sihat yang perlu diambil dengan banyak.",
         sampingan: [
-            { text: "Kita disyorkan untuk mengambil dua hingga tiga sajian sayur dan dua sajian buah-buahan setiap hari.", correct: true },
-            { text: "Contoh makanan segar dalam kumpulan ini ialah sayur bayam, lobak merah dan tembikai.", correct: true }
+            { text: "Kita disyorkan untuk mengambil dua hingga tiga sajian sayur dan dua sajian buah-buahan pada setiap hari.", correct: true },
+            { text: "Contoh makanan segar dalam kumpulan ini ialah sayur bayam, lobak merah, buah pisang dan tembikai.", correct: true }
         ]
     },
     {
-        title: "Karbohidrat",
-        color: "#f1c40f",
+        label: "Perenggan 3",
+        color: "#f39c12", // Jingga
         utama: "Sumber karbohidrat pula penting sebagai pembekal tenaga utama kepada tubuh badan kita.",
         sampingan: [
             { text: "Kumpulan makanan jenis ini perlu diambil pada kadar tiga hingga lima sajian dalam tempoh sehari.", correct: true },
-            { text: "Antara makanan lazim ialah nasi putih, roti, mi dan pelbagai jenis bijirin.", correct: true }
+            { text: "Antara makanan lazim yang termasuk dalam kumpulan karbohidrat ialah nasi putih, roti, mi dan pelbagai jenis bijirin.", correct: true }
         ]
     },
     {
-        title: "Protein",
-        color: "#e67e22",
-        utama: "Sumber protein amat diperlukan oleh manusia untuk membantu tumbesaran dan membina badan yang kuat.",
+        label: "Perenggan 4",
+        color: "#d35400", // Jingga Gelap
+        utama: "Seterusnya, sumber protein amat diperlukan oleh manusia untuk membantu tumbesaran dan membina badan yang kuat.",
         sampingan: [
-            { text: "Pengambilan protein memadai antara satu hingga dua sajian sahaja setiap hari.", correct: true },
-            { text: "Ikan, ayam, daging, telur dan tauhu merupakan antara sumber protein yang sangat baik.", correct: true }
+            { text: "Pengambilan protein tidak perlu terlalu banyak, hanya memadai antara satu hingga dua sajian sahaja setiap hari.", correct: true },
+            { text: "Ikan, ayam, daging, telur dan tauhu merupakan antara contoh sumber protein yang sangat baik.", correct: true }
+        ]
+    },
+    {
+        label: "Perenggan 5",
+        color: "#1abc9c", // Teal
+        utama: "Susu dan produk tenusu juga merupakan sebahagian daripada menu harian yang membekalkan kebaikan tambahan kepada badan.",
+        sampingan: [
+            { text: "Piramid makanan menggalakkan kita untuk mengambil sebanyak dua sajian daripada kumpulan ini setiap hari.", correct: true },
+            { text: "Makanan dan minuman seperti susu, keju serta yogurt adalah pilihan terbaik untuk melengkapkan sajian tersebut.", correct: true }
+        ]
+    },
+    {
+        label: "Perenggan 6 (Penutup)",
+        color: "#e74c3c", // Merah
+        utama: "Akhir sekali, kumpulan lemak, gula dan garam terletak di kedudukan paling atas dan terkecil dalam piramid makanan.",
+        sampingan: [
+            { text: "Kedudukan ini mengingatkan kita bahawa makanan dalam kumpulan ini wajib dikurangkan pengambilannya setiap hari.", correct: true },
+            { text: "Menjauhi makanan seperti kek coklat dan sajian berminyak akan mengelakkan kita daripada pelbagai penyakit berbahaya.", correct: true }
         ]
     }
 ];
@@ -280,32 +303,29 @@ const paragraphs = [
 let currentRound = 0;
 let score = 0;
 let lives = 3;
-let timeLeft = 120; // 2 minit
+let timeLeft = 180; // 3 minit
 let timerInterval;
 let selectedUtama = null;
 
-// SOUND SYNTHESIS (Tiada fail luaran diperlukan)
+// SOUND SYSTEM (Web Audio API)
 const playSound = (type) => {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    osc.connect(gain); gain.connect(ctx.destination);
 
     if(type === 'correct') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(500, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
         gain.gain.setValueAtTime(0.1, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-        osc.start(); osc.stop(ctx.currentTime + 0.2);
     } else {
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        osc.frequency.setValueAtTime(100, ctx.currentTime);
         gain.gain.setValueAtTime(0.1, ctx.currentTime);
         gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
-        osc.start(); osc.stop(ctx.currentTime + 0.3);
     }
+    osc.start(); osc.stop(ctx.currentTime + 0.3);
 };
 
 function initGame() {
@@ -321,41 +341,44 @@ function startTimer() {
         const display = document.getElementById('timer-display');
         display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         
-        if(timeLeft <= 10) display.classList.add('low');
-        if(timeLeft <= 0) endGame(false, "Masa tamat!");
+        if(timeLeft <= 15) display.classList.add('low');
+        if(timeLeft <= 0) endGame(false, "Masa tamat! Terus mencuba!");
     }, 1000);
 }
 
 function renderRound() {
     const data = paragraphs[currentRound];
     document.body.style.setProperty('--theme-color', data.color);
-    document.getElementById('feedback').textContent = "Pilih Idea Utama dahulu.";
+    document.getElementById('feedback').textContent = "Langkah 1: Pilih Idea Utama.";
     document.getElementById('feedback').style.color = "#7f8c8d";
+    document.getElementById('round-val').textContent = `${currentRound + 1} / 6`;
     
     // Render Utama
     const colU = document.getElementById('col-utama');
     colU.innerHTML = '';
     const uCard = document.createElement('div');
     uCard.className = 'card';
-    uCard.innerHTML = `<span class="badge">IDEA UTAMA: ${data.title}</span><br>${data.utama}`;
+    uCard.innerHTML = `<span class="badge">${data.label}</span><br>${data.utama}`;
     uCard.onclick = () => {
         if(uCard.classList.contains('matched')) return;
         selectedUtama = uCard;
         document.querySelectorAll('#col-utama .card').forEach(c => c.classList.remove('selected'));
         uCard.classList.add('selected');
-        document.getElementById('feedback').textContent = "Sekarang cari Idea Sampingan yang betul.";
+        document.getElementById('feedback').textContent = "Langkah 2: Padankan dengan Idea Sampingan.";
     };
     colU.appendChild(uCard);
 
-    // Render Sampingan (dengan pengacau)
+    // Render Sampingan (Shuffle dengan distractors)
     const colS = document.getElementById('col-sampingan');
     colS.innerHTML = '';
     
-    // Ambil 2 yang betul + 2 pengacau dari perenggan lain
     let pool = [...data.sampingan];
-    let distractors = paragraphs
+    // Ambil pengacau dari perenggan lain secara rawak
+    let allOthers = paragraphs
         .filter((_, i) => i !== currentRound)
-        .map(p => p.sampingan[0])
+        .flatMap(p => p.sampingan);
+    
+    let distractors = allOthers
         .sort(() => 0.5 - Math.random())
         .slice(0, 2)
         .map(s => ({ ...s, correct: false }));
@@ -375,38 +398,39 @@ function renderRound() {
 
 function checkMatch(item, element) {
     if(!selectedUtama) {
-        document.getElementById('feedback').textContent = "❌ Pilih Idea Utama di kiri dahulu!";
+        document.getElementById('feedback').textContent = "❌ Klik Idea Utama di kiri dahulu!";
+        playSound('wrong');
         return;
     }
     if(element.classList.contains('matched')) return;
 
     if(item.correct) {
         playSound('correct');
-        score += 20;
+        score += 25;
         document.getElementById('score-val').textContent = score;
         element.classList.add('matched');
         element.innerHTML += " ✅";
-        document.getElementById('feedback').textContent = "✨ Bijak! Teruskan.";
+        document.getElementById('feedback').textContent = "Sangat Bagus! Cari satu lagi.";
         document.getElementById('feedback').style.color = "var(--green-d)";
 
-        // Cek jika perenggan selesai
-        const correctOnScreen = document.querySelectorAll('#col-sampingan .card.matched').length;
-        if(correctOnScreen === 2) {
+        const matchedCount = document.querySelectorAll('#col-sampingan .card.matched').length;
+        if(matchedCount === 2) {
             selectedUtama.classList.add('matched');
             selectedUtama.classList.remove('selected');
             selectedUtama.innerHTML += " ⭐";
-            setTimeout(nextRound, 1000);
+            selectedUtama = null;
+            setTimeout(nextRound, 1200);
         }
     } else {
         playSound('wrong');
         lives--;
         updateLives();
         element.classList.add('wrong');
-        document.getElementById('feedback').textContent = "Oops! Itu Idea Sampingan bagi perenggan lain.";
+        document.getElementById('feedback').textContent = "Padanan salah! Nyawa berkurangan.";
         document.getElementById('feedback').style.color = "var(--red)";
         setTimeout(() => element.classList.remove('wrong'), 500);
         
-        if(lives <= 0) endGame(false, "Nyawa anda telah habis!");
+        if(lives <= 0) endGame(false, "Jangan putus asa! Cuba lagi.");
     }
 }
 
@@ -424,7 +448,7 @@ function nextRound() {
     if(currentRound < paragraphs.length) {
         renderRound();
     } else {
-        endGame(true, "Luar biasa! Anda pakar Piramid Makanan!");
+        endGame(true, "Tahniah Cikgu! Karangan Piramid Makanan telah lengkap!");
     }
 }
 
@@ -432,12 +456,12 @@ function endGame(win, msg) {
     clearInterval(timerInterval);
     const screen = document.getElementById('end-screen');
     screen.style.display = 'flex';
-    document.getElementById('end-title').textContent = win ? "TAHNIAH! 🏆" : "CUBA LAGI! 🏁";
+    document.getElementById('end-title').textContent = win ? "SYABAS! 🏆" : "TAMAT PERMAINAN 🏁";
     document.getElementById('end-msg').textContent = msg;
-    document.getElementById('final-score').textContent = score + " MATA";
+    document.getElementById('final-score').textContent = score;
     
     if(win) {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
     }
 }
 
